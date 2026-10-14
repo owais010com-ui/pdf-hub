@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
+import { download } from "./download";
 
 function ImagesToPdf() {
   const [files, setFiles] = useState([]);
@@ -19,33 +20,28 @@ function ImagesToPdf() {
       const page = pdf.addPage([img.width, img.height]);
       page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
-    const data = await pdf.save();
-    const url = URL.createObjectURL(
-      new Blob([data], { type: "application/pdf" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "images.pdf";
-    a.click();
-    URL.revokeObjectURL(url);
+    download(await pdf.save(), "images.pdf");
   };
 
   return (
-    <div>
-      <h1>Images to PDF</h1>
+    <div className="space-y-4">
       <input
         type="file"
         accept="image/png, image/jpeg"
         multiple
         onChange={handleSelect}
       />
-      <ul>
+      <ul className="text-sm text-gray-600 list-disc pl-5">
         {files.map((f, i) => (
           <li key={i}>{f.name}</li>
         ))}
       </ul>
-      <button onClick={makePDF} disabled={files.length === 0}>
-        PDF banao
+      <button
+        onClick={makePDF}
+        disabled={files.length === 0}
+        className="bg-[var(--brand)] text-white px-5 py-2 rounded disabled:opacity-40"
+      >
+        Create PDF
       </button>
     </div>
   );

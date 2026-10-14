@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
+import { download } from "./download";
 
 function Merge() {
   const [files, setFiles] = useState([]);
@@ -15,33 +16,28 @@ function Merge() {
       const pages = await merged.copyPages(pdf, pdf.getPageIndices());
       pages.forEach((p) => merged.addPage(p));
     }
-    const data = await merged.save();
-    const url = URL.createObjectURL(
-      new Blob([data], { type: "application/pdf" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "merged.pdf";
-    a.click();
-    URL.revokeObjectURL(url);
+    download(await merged.save(), "merged.pdf");
   };
 
   return (
-    <div>
-      <h1>Merge PDF</h1>
+    <div className="space-y-4">
       <input
         type="file"
         accept="application/pdf"
         multiple
         onChange={handleSelect}
       />
-      <ul>
+      <ul className="text-sm text-gray-600 list-disc pl-5">
         {files.map((f, i) => (
           <li key={i}>{f.name}</li>
         ))}
       </ul>
-      <button onClick={mergePDFs} disabled={files.length < 2}>
-        Merge karo
+      <button
+        onClick={mergePDFs}
+        disabled={files.length < 2}
+        className="bg-[var(--brand)] text-white px-5 py-2 rounded disabled:opacity-40"
+      >
+        Merge PDFs
       </button>
     </div>
   );
