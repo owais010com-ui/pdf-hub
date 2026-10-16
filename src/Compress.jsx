@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { download } from "./download";
+import FileDrop from "./FileDrop";
 
 const presets = [
-  { label: "CNIC photo (200 KB)", kb: 200 },
-  { label: "Form upload (500 KB)", kb: 500 },
-  { label: "Portal limit (1 MB)", kb: 1024 },
+  { label: "CNIC photo", kb: 200 },
+  { label: "Form upload", kb: 500 },
+  { label: "Portal limit", kb: 1024 },
 ];
 
 const toBlob = (canvas, quality) =>
@@ -47,16 +48,13 @@ async function compress(file, targetKB) {
   return last;
 }
 
+const fmt = (b) => (b / 1024).toFixed(0) + " KB";
+
 function Compress() {
   const [file, setFile] = useState(null);
   const [kb, setKb] = useState(200);
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
-
-  const handleSelect = (e) => {
-    setFile(e.target.files[0] || null);
-    setResult(null);
-  };
 
   const run = async () => {
     setBusy(true);
@@ -64,50 +62,44 @@ function Compress() {
     setBusy(false);
   };
 
-  const fmt = (b) => (b / 1024).toFixed(0) + " KB";
-
   return (
-    <div className="space-y-4">
-      <input
-        type="file"
-        accept="image/png, image/jpeg"
-        onChange={handleSelect}
+    <div className="space-y-5">
+      <FileDrop
+        types={["image/png", "image/jpeg"]}
+        label={file ? file.name : "Choose a photo"}
+        onFiles={([f]) => {
+          setFile(f);
+          setResult(null);
+        }}
       />
 
       <div className="flex flex-wrap gap-2">
         {presets.map((p) => (
           <button
             key={p.kb}
+            className={kb === p.kb ? "btn-primary" : "btn-ghost"}
             onClick={() => {
               setKb(p.kb);
               setResult(null);
             }}
-            className={`px-3 py-2 rounded border text-sm ${
-              kb === p.kb ? "bg-[var(--brand)] text-white" : "bg-white"
-            }`}
           >
-            {p.label}
+            {p.label} ({p.kb >= 1024 ? "1 MB" : p.kb + " KB"})
           </button>
         ))}
       </div>
 
-      <button
-        onClick={run}
-        disabled={!file || busy}
-        className="bg-[var(--brand)] text-white px-5 py-2 rounded disabled:opacity-40"
-      >
+      <button className="btn-primary w-full" onClick={run} disabled={!file || busy}>
         {busy ? "Compressing..." : "Compress"}
       </button>
 
       {file && result && (
-        <div className="space-y-2">
-          <p className="text-sm text-gray-600">
-            {fmt(file.size)} → {fmt(result.size)}
+        <div className="fade-up bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap">
+          <p>
+            <span className="text-white/50">{fmt(file.size)}</span>
+            {"  →  "}
+            <span className="font-bold text-green-400">{fmt(result.size)}</span>
           </p>
-          <button
-            onClick={() => download(result, "compressed.jpg", "image/jpeg")}
-            className="border px-5 py-2 rounded"
-          >
+          <button className="btn-ghost" onClick={() => download(result, "compressed.jpg", "image/jpeg")}>
             Download image
           </button>
         </div>

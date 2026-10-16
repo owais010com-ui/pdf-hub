@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
+import FileDrop from "./FileDrop";
+import FileList from "./FileList";
+
+const A4 = [595.28, 841.89];
 
 function ImagesToPdf() {
   const [files, setFiles] = useState([]);
-
-  const handleSelect = (e) => {
-    setFiles([...files, ...Array.from(e.target.files)]);
-  };
+  const [mode, setMode] = useState("fit");
+  const [busy, setBusy] = useState(false);
 
   const makePDF = async () => {
+    setBusy(true);
     const pdf = await PDFDocument.create();
     for (const file of files) {
       const bytes = await file.arrayBuffer();
@@ -17,31 +20,50 @@ function ImagesToPdf() {
         file.type === "image/png"
           ? await pdf.embedPng(bytes)
           : await pdf.embedJpg(bytes);
-      const page = pdf.addPage([img.width, img.height]);
-      page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+
+      if (mode === "a4") {
+        const page = pdf.addPage(A4);
+        const m = 24;
+        const s = Math.min((A4[0] - 2 * m) / img.width, (A4[1] - 2 * m) / img.height);
+        const w = img.width * s;
+        const h = img.height * s;
+        page.drawImage(img, { x: (A4[0] - w) / 2, y: (A4[1] - h) / 2, width: w, height: h });
+      } else {
+        const page = pdf.addPage([img.width, img.height]);
+        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+      }
     }
     download(await pdf.save(), "images.pdf");
+    setBusy(false);
   };
 
   return (
-    <div className="space-y-4">
-      <input
-        type="file"
-        accept="image/png, image/jpeg"
+    <div className="space-y-5">
+      <FileDrop
+        types={["image/png", "image/jpeg"]}
         multiple
-        onChange={handleSelect}
+        label="Add photos (JPG / PNG)"
+        onFiles={(f) => setFiles([...files, ...f])}
       />
-      <ul className="text-sm text-gray-600 list-disc pl-5">
-        {files.map((f, i) => (
-          <li key={i}>{f.name}</li>
-        ))}
-      </ul>
-      <button
-        onClick={makePDF}
-        disabled={files.length === 0}
-        className="bg-[var(--brand)] text-white px-5 py-2 rounded disabled:opacity-40"
-      >
-        Create PDF
+      <FileList files={files} setFiles={setFiles} />
+
+      <div className="flex gap-2">
+        <button
+          className={mode === "fit" ? "btn-primary" : "btn-ghost"}
+          onClick={() => setMode("fit")}
+        >
+          Fit to image
+        </button>
+        <button
+          className={mode === "a4" ? "btn-primary" : "btn-ghost"}
+          onClick={() => setMode("a4")}
+        >
+          A4 page
+        </button>
+      </div>
+
+      <button className="btn-primary w-full" onClick={makePDF} disabled={!files.length || busy}>
+        {busy ? "Creating..." : `Create PDF (${files.length})`}
       </button>
     </div>
   );

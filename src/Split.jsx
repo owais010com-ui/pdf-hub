@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
+import FileDrop from "./FileDrop";
 
 function Split() {
   const [file, setFile] = useState(null);
@@ -8,9 +9,7 @@ function Split() {
   const [from, setFrom] = useState(1);
   const [to, setTo] = useState(1);
 
-  const handleSelect = async (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
+  const handleSelect = async ([f]) => {
     const pdf = await PDFDocument.load(await f.arrayBuffer());
     setFile(f);
     setTotal(pdf.getPageCount());
@@ -31,38 +30,23 @@ function Split() {
   const valid = file && from >= 1 && to <= total && from <= to;
 
   return (
-    <div className="space-y-4">
-      <input type="file" accept="application/pdf" onChange={handleSelect} />
+    <div className="space-y-5">
+      <FileDrop
+        types={["application/pdf"]}
+        label={file ? file.name : "Choose a PDF"}
+        onFiles={handleSelect}
+      />
       {file && (
-        <>
-          <p className="text-sm text-gray-600">Total pages: {total}</p>
-          <div className="flex gap-3 items-center">
-            <span>From</span>
-            <input
-              type="number"
-              min="1"
-              max={total}
-              value={from}
-              onChange={(e) => setFrom(Number(e.target.value))}
-              className="border rounded p-2 w-20"
-            />
-            <span>to</span>
-            <input
-              type="number"
-              min="1"
-              max={total}
-              value={to}
-              onChange={(e) => setTo(Number(e.target.value))}
-              className="border rounded p-2 w-20"
-            />
-          </div>
-        </>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-white/60">Pages {total} total. Extract from</span>
+          <input type="number" className="input" min="1" max={total} value={from}
+            onChange={(e) => setFrom(Number(e.target.value))} />
+          <span className="text-white/60">to</span>
+          <input type="number" className="input" min="1" max={total} value={to}
+            onChange={(e) => setTo(Number(e.target.value))} />
+        </div>
       )}
-      <button
-        onClick={split}
-        disabled={!valid}
-        className="bg-[var(--brand)] text-white px-5 py-2 rounded disabled:opacity-40"
-      >
+      <button className="btn-primary w-full" onClick={split} disabled={!valid}>
         Extract pages
       </button>
     </div>

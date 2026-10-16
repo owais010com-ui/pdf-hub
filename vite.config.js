@@ -13,8 +13,8 @@ export default defineConfig({
         name: "PDF Hub",
         short_name: "PDF Hub",
         description: "Make, merge and split PDFs privately",
-        theme_color: "#0f766e",
-        background_color: "#ffffff",
+        theme_color: "#0b0714",
+        background_color: "#0b0714",
         display: "standalone",
         icons: [
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },
