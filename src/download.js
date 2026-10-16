@@ -1,7 +1,6 @@
-export function download(data, filename) {
-  const url = URL.createObjectURL(
-    new Blob([data], { type: "application/pdf" }),
-  );
+
+export function download(data, filename, type = "application/pdf") {
+  const url = URL.createObjectURL(new Blob([data], { type }));
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;

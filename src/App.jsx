@@ -2,12 +2,14 @@ import { useState } from "react";
 import ImagesToPdf from "./ImagesToPdf";
 import Merge from "./Merge";
 import Split from "./Split";
+import Compress from "./Compress";
 import { config } from "./config";
 
 const tabs = [
   { id: "images", label: "Images to PDF", view: <ImagesToPdf /> },
   { id: "merge", label: "Merge PDF", view: <Merge /> },
   { id: "split", label: "Split PDF", view: <Split /> },
+  { id: "compress", label: "Compress Image", view: <Compress /> },
 ];
 
 function App() {
@@ -29,11 +31,10 @@ function App() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`px-4 py-2 rounded whitespace-nowrap ${
-                tab === t.id
+              className={`px-4 py-2 rounded whitespace-nowrap ${tab === t.id
                   ? "bg-[var(--brand)] text-white"
                   : "bg-white border"
-              }`}
+                }`}
             >
               {t.label}
             </button>
