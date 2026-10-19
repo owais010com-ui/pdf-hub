@@ -1,43 +1,44 @@
 import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
+import FileDrop from "./FileDrop";
+import FileList from "./FileList";
 
 function Merge() {
   const [files, setFiles] = useState([]);
-
-  const handleSelect = (e) => {
-    setFiles([...files, ...Array.from(e.target.files)]);
-  };
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
 
   const mergePDFs = async () => {
-    const merged = await PDFDocument.create();
-    for (const file of files) {
-      const pdf = await PDFDocument.load(await file.arrayBuffer());
-      const pages = await merged.copyPages(pdf, pdf.getPageIndices());
-      pages.forEach((p) => merged.addPage(p));
+    setBusy(true);
+    setMsg("");
+    try {
+      const merged = await PDFDocument.create();
+      for (const file of files) {
+        const pdf = await PDFDocument.load(await file.arrayBuffer());
+        const pages = await merged.copyPages(pdf, pdf.getPageIndices());
+        pages.forEach((p) => merged.addPage(p));
+      }
+      download(await merged.save(), "merged.pdf");
+    } catch {
+      setMsg("One of the PDFs could not be opened (password protected or damaged).");
     }
-    download(await merged.save(), "merged.pdf");
+    setBusy(false);
   };
 
   return (
-    <div className="space-y-4">
-      <input
-        type="file"
-        accept="application/pdf"
+    <div className="flex flex-col gap-5">
+      <FileDrop
+        types={["application/pdf"]}
         multiple
-        onChange={handleSelect}
+        label="Add PDF files"
+        onFiles={(f) => setFiles([...files, ...f])}
       />
-      <ul className="text-sm text-gray-600 list-disc pl-5">
-        {files.map((f, i) => (
-          <li key={i}>{f.name}</li>
-        ))}
-      </ul>
-      <button
-        onClick={mergePDFs}
-        disabled={files.length < 2}
-        className="bg-[var(--brand)] text-white px-5 py-2 rounded disabled:opacity-40"
-      >
-        Merge PDFs
+      <FileList files={files} setFiles={setFiles} />
+      <p className="note">Use the arrows to set the order. Minimum 2 PDFs.</p>
+      {msg && <p className="error">{msg}</p>}
+      <button className="btn" onClick={mergePDFs} disabled={files.length < 2 || busy}>
+        {busy ? "Merging..." : "Merge PDFs"}
       </button>
     </div>
   );

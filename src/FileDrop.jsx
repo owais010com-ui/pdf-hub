@@ -11,6 +11,7 @@ function FileDrop({ types, multiple, onFiles, label }) {
 
     return (
         <div
+            className={`drop ${over ? "over" : ""}`}
             onClick={() => ref.current.click()}
             onDragOver={(e) => {
                 e.preventDefault();
@@ -22,14 +23,11 @@ function FileDrop({ types, multiple, onFiles, label }) {
                 setOver(false);
                 take(e.dataTransfer.files);
             }}
-            className={`cursor-pointer text-center rounded-2xl border-2 border-dashed p-8 transition ${over
-                    ? "border-[var(--brand)] bg-white/10 scale-[1.02]"
-                    : "border-white/20 hover:border-[var(--brand)] hover:bg-white/5"
-                }`}
         >
-            <div className="text-4xl mb-2">📂</div>
-            <p className="font-semibold">{label}</p>
-            <p className="text-sm text-white/50">Drag and drop here, or click to choose</p>
+            <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
+            <p className="note" style={{ margin: "4px 0 0" }}>
+                Drop here or click to choose
+            </p>
             <input
                 ref={ref}
                 type="file"

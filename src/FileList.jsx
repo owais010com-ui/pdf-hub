@@ -17,9 +17,24 @@ function Thumb({ file }) {
     }, [file]);
 
     return url ? (
-        <img src={url} alt="" className="w-12 h-12 object-cover rounded-lg" />
+        <img
+            src={url}
+            alt=""
+            style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8 }}
+        />
     ) : (
-        <div className="w-12 h-12 rounded-lg bg-white/10 grid place-items-center text-xs font-bold">
+        <div
+            style={{
+                width: 44,
+                height: 44,
+                borderRadius: 8,
+                background: "var(--line)",
+                display: "grid",
+                placeItems: "center",
+                fontSize: 11,
+                fontWeight: 700,
+            }}
+        >
             PDF
         </div>
     );
@@ -33,39 +48,37 @@ function FileList({ files, setFiles }) {
         [next[i], next[j]] = [next[j], next[i]];
         setFiles(next);
     };
-
     const remove = (i) => setFiles(files.filter((_, k) => k !== i));
 
     if (!files.length) return null;
 
     return (
-        <ul className="space-y-2">
+        <div className="flex flex-col gap-2">
             {files.map((f, i) => (
-                <li
-                    key={f.name + i}
-                    className="fade-up flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-2"
-                >
-                    <span className="w-6 text-center text-white/40 text-sm">{i + 1}</span>
+                <div key={f.name + i} className="row">
+                    <span className="note" style={{ width: 20, textAlign: "center" }}>
+                        {i + 1}
+                    </span>
                     <Thumb file={f} />
-                    <div className="flex-1 min-w-0">
-                        <p className="truncate text-sm">{f.name}</p>
-                        <p className="text-xs text-white/40">{size(f.size)}</p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                            style={{
+                                fontSize: 14,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {f.name}
+                        </div>
+                        <div className="note">{size(f.size)}</div>
                     </div>
-                    <button className="btn-ghost !px-3 !py-1" onClick={() => move(i, -1)}>
-                        ↑
-                    </button>
-                    <button className="btn-ghost !px-3 !py-1" onClick={() => move(i, 1)}>
-                        ↓
-                    </button>
-                    <button
-                        className="btn-ghost !px-3 !py-1 !text-pink-400"
-                        onClick={() => remove(i)}
-                    >
-                        ✕
-                    </button>
-                </li>
+                    <button className="btn btn-ghost btn-sm" onClick={() => move(i, -1)}>↑</button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => move(i, 1)}>↓</button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => remove(i)}>✕</button>
+                </div>
             ))}
-        </ul>
+        </div>
     );
 }
 

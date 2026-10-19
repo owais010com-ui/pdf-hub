@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { download } from "./download";
 import FileDrop from "./FileDrop";
-
-const presets = [
-  { label: "CNIC photo", kb: 200 },
-  { label: "Form upload", kb: 500 },
-  { label: "Portal limit", kb: 1024 },
-];
+import { Choice, Field } from "./ui";
 
 const toBlob = (canvas, quality) =>
   new Promise((res) => canvas.toBlob(res, "image/jpeg", quality));
 
 async function compress(file, targetKB) {
-  const bitmap = await createImageBitmap(file);
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const target = targetKB * 1024;
   let scale = 1;
   let last = null;
@@ -63,7 +58,7 @@ function Compress() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <FileDrop
         types={["image/png", "image/jpeg"]}
         label={file ? file.name : "Choose a photo"}
@@ -73,33 +68,45 @@ function Compress() {
         }}
       />
 
-      <div className="flex flex-wrap gap-2">
-        {presets.map((p) => (
-          <button
-            key={p.kb}
-            className={kb === p.kb ? "btn-primary" : "btn-ghost"}
-            onClick={() => {
-              setKb(p.kb);
-              setResult(null);
-            }}
-          >
-            {p.label} ({p.kb >= 1024 ? "1 MB" : p.kb + " KB"})
-          </button>
-        ))}
+      <Field label="Target size">
+        <Choice
+          value={kb}
+          onChange={(v) => {
+            setKb(v);
+            setResult(null);
+          }}
+          options={[[200, "CNIC 200 KB"], [500, "Form 500 KB"], [1024, "Portal 1 MB"]]}
+        />
+      </Field>
+
+      <div>
+        <span className="label">Or type your own size (KB)</span>
+        <input
+          type="number"
+          className="input"
+          style={{ width: 140 }}
+          min="20"
+          value={kb}
+          onChange={(e) => {
+            setKb(Number(e.target.value));
+            setResult(null);
+          }}
+        />
       </div>
 
-      <button className="btn-primary w-full" onClick={run} disabled={!file || busy}>
+      <button className="btn" onClick={run} disabled={!file || busy || kb < 20}>
         {busy ? "Compressing..." : "Compress"}
       </button>
 
       {file && result && (
-        <div className="fade-up bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap">
-          <p>
-            <span className="text-white/50">{fmt(file.size)}</span>
-            {"  →  "}
-            <span className="font-bold text-green-400">{fmt(result.size)}</span>
-          </p>
-          <button className="btn-ghost" onClick={() => download(result, "compressed.jpg", "image/jpeg")}>
+        <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap", padding: 14 }}>
+          <span>
+            {fmt(file.size)} → <b>{fmt(result.size)}</b>
+          </span>
+          <button
+            className="btn btn-sm"
+            onClick={() => download(result, "compressed.jpg", "image/jpeg")}
+          >
             Download image
           </button>
         </div>

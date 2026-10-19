@@ -1,69 +1,107 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
+import { imageToJpeg } from "./utils";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
+import { Choice, Field } from "./ui";
 
-const A4 = [595.28, 841.89];
+const PW = 595.28;
+const PH = 841.89;
+const M = 18;
+const GAP = 12;
 
 function ImagesToPdf() {
   const [files, setFiles] = useState([]);
-  const [mode, setMode] = useState("fit");
+  const [per, setPer] = useState(1);
   const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const cam = useRef();
+
+  const addFromCamera = (e) => {
+    const f = Array.from(e.target.files).filter((x) =>
+      ["image/jpeg", "image/png"].includes(x.type)
+    );
+    if (f.length) setFiles([...files, ...f]);
+    e.target.value = "";
+  };
 
   const makePDF = async () => {
     setBusy(true);
-    const pdf = await PDFDocument.create();
-    for (const file of files) {
-      const bytes = await file.arrayBuffer();
-      const img =
-        file.type === "image/png"
-          ? await pdf.embedPng(bytes)
-          : await pdf.embedJpg(bytes);
-
-      if (mode === "a4") {
-        const page = pdf.addPage(A4);
-        const m = 24;
-        const s = Math.min((A4[0] - 2 * m) / img.width, (A4[1] - 2 * m) / img.height);
-        const w = img.width * s;
-        const h = img.height * s;
-        page.drawImage(img, { x: (A4[0] - w) / 2, y: (A4[1] - h) / 2, width: w, height: h });
-      } else {
-        const page = pdf.addPage([img.width, img.height]);
-        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+    setMsg("");
+    try {
+      const pdf = await PDFDocument.create();
+      const imgs = [];
+      for (const f of files) {
+        const { bytes } = await imageToJpeg(f);
+        imgs.push(await pdf.embedJpg(bytes));
       }
+
+      const cols = per === 4 ? 2 : 1;
+      const rows = per / cols;
+      const cw = (PW - 2 * M - GAP * (cols - 1)) / cols;
+      const ch = (PH - 2 * M - GAP * (rows - 1)) / rows;
+
+      for (let i = 0; i < imgs.length; i += per) {
+        const page = pdf.addPage([PW, PH]);
+        imgs.slice(i, i + per).forEach((img, k) => {
+          const col = k % cols;
+          const row = Math.floor(k / cols);
+          const s = Math.min(cw / img.width, ch / img.height);
+          const w = img.width * s;
+          const h = img.height * s;
+          const cx = M + col * (cw + GAP);
+          const cyTop = PH - M - row * (ch + GAP);
+          page.drawImage(img, {
+            x: cx + (cw - w) / 2,
+            y: cyTop - ch + (ch - h) / 2,
+            width: w,
+            height: h,
+          });
+        });
+      }
+      download(await pdf.save(), "images.pdf");
+    } catch {
+      setMsg("Something went wrong with one of the images.");
     }
-    download(await pdf.save(), "images.pdf");
     setBusy(false);
   };
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <FileDrop
         types={["image/png", "image/jpeg"]}
         multiple
-        label="Add photos (JPG / PNG)"
+        label="Add photos (JPG or PNG)"
         onFiles={(f) => setFiles([...files, ...f])}
       />
-      <FileList files={files} setFiles={setFiles} />
 
-      <div className="flex gap-2">
-        <button
-          className={mode === "fit" ? "btn-primary" : "btn-ghost"}
-          onClick={() => setMode("fit")}
-        >
-          Fit to image
+      <div>
+        <button className="btn btn-ghost" onClick={() => cam.current.click()}>
+          Scan with camera
         </button>
-        <button
-          className={mode === "a4" ? "btn-primary" : "btn-ghost"}
-          onClick={() => setMode("a4")}
-        >
-          A4 page
-        </button>
+        <input
+          ref={cam}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          onChange={addFromCamera}
+        />
+        <p className="note" style={{ margin: "6px 0 0" }}>
+          On phone this opens the camera. Take one photo per page.
+        </p>
       </div>
 
-      <button className="btn-primary w-full" onClick={makePDF} disabled={!files.length || busy}>
-        {busy ? "Creating..." : `Create PDF (${files.length})`}
+      <FileList files={files} setFiles={setFiles} />
+
+      <Field label="Photos per page">
+        <Choice value={per} onChange={setPer} options={[[1, "1"], [2, "2"], [4, "4"]]} />
+      </Field>
+
+      {msg && <p className="error">{msg}</p>}
+      <button className="btn" onClick={makePDF} disabled={!files.length || busy}>
+        {busy ? "Creating..." : `Create PDF (${files.length} photos)`}
       </button>
     </div>
   );

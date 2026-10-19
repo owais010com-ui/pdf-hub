@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { config } from "./src/config.js";
 
 export default defineConfig({
   plugins: [
@@ -10,11 +11,11 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "PDF Hub",
-        short_name: "PDF Hub",
-        description: "Make, merge and split PDFs privately",
-        theme_color: "#0b0714",
-        background_color: "#0b0714",
+        name: config.name,
+        short_name: config.name.slice(0, 12),
+        description: config.tagline,
+        theme_color: "#f5f2ea",
+        background_color: "#f5f2ea",
         display: "standalone",
         icons: [
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },
