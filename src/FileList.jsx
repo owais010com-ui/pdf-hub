@@ -20,6 +20,7 @@ function Thumb({ file }) {
         <img
             src={url}
             alt=""
+            draggable={false}
             style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8 }}
         />
     ) : (
@@ -41,11 +42,14 @@ function Thumb({ file }) {
 }
 
 function FileList({ files, setFiles }) {
-    const move = (i, d) => {
+    const [drag, setDrag] = useState(null);
+    const [over, setOver] = useState(null);
+
+    const move = (from, to) => {
+        if (from === null || from === to || to < 0 || to >= files.length) return;
         const next = [...files];
-        const j = i + d;
-        if (j < 0 || j >= next.length) return;
-        [next[i], next[j]] = [next[j], next[i]];
+        const [m] = next.splice(from, 1);
+        next.splice(to, 0, m);
         setFiles(next);
     };
     const remove = (i) => setFiles(files.filter((_, k) => k !== i));
@@ -55,27 +59,60 @@ function FileList({ files, setFiles }) {
     return (
         <div className="flex flex-col gap-2">
             {files.map((f, i) => (
-                <div key={f.name + i} className="row">
+                <div
+                    key={f.name + f.size + i}
+                    className="row"
+                    draggable
+                    onDragStart={() => setDrag(i)}
+                    onDragOver={(e) => {
+                        e.preventDefault();
+                        setOver(i);
+                    }}
+                    onDrop={() => {
+                        move(drag, i);
+                        setDrag(null);
+                        setOver(null);
+                    }}
+                    onDragEnd={() => {
+                        setDrag(null);
+                        setOver(null);
+                    }}
+                    style={{
+                        cursor: "grab",
+                        opacity: drag === i ? 0.4 : 1,
+                        borderColor: over === i && drag !== null && drag !== i ? "var(--ink)" : undefined,
+                    }}
+                >
                     <span className="note" style={{ width: 20, textAlign: "center" }}>
                         {i + 1}
                     </span>
                     <Thumb file={f} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                         <div
+                            dir="ltr"
                             style={{
                                 fontSize: 14,
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
+                                textAlign: "start",
                             }}
                         >
                             {f.name}
                         </div>
                         <div className="note">{size(f.size)}</div>
                     </div>
-                    <button className="btn btn-ghost btn-sm" onClick={() => move(i, -1)}>↑</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => move(i, 1)}>↓</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => remove(i)}>✕</button>
+                    <span className="flex gap-1" dir="ltr">
+                        <button className="btn btn-ghost btn-sm" onClick={() => move(i, i - 1)} disabled={i === 0}>
+                            ↑
+                        </button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => move(i, i + 1)} disabled={i === files.length - 1}>
+                            ↓
+                        </button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => remove(i)}>
+                            ✕
+                        </button>
+                    </span>
                 </div>
             ))}
         </div>

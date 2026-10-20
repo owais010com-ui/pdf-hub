@@ -23,3 +23,31 @@ export function Field({ label, children }) {
         </div>
     );
 }
+
+export function Progress({ done, total }) {
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    return (
+        <div>
+            <div
+                style={{
+                    height: 8,
+                    borderRadius: 99,
+                    background: "var(--line)",
+                    overflow: "hidden",
+                }}
+            >
+                <div
+                    style={{
+                        width: pct + "%",
+                        height: "100%",
+                        background: "var(--ink)",
+                        transition: "width 0.2s ease",
+                    }}
+                />
+            </div>
+            <p className="note" dir="ltr" style={{ margin: "6px 0 0", textAlign: "center" }}>
+                {done} / {total}
+            </p>
+        </div>
+    );
+}

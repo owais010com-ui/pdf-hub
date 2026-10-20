@@ -5,7 +5,7 @@ import { imageToJpeg } from "./utils";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
-import { Choice, Field } from "./ui";
+import { Choice, Field, Progress } from "./ui";
 
 const PW = 595.28;
 const PH = 841.89;
@@ -17,6 +17,7 @@ function ImagesToPdf() {
   const [files, setFiles] = useState([]);
   const [per, setPer] = useState(1);
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(0);
   const [msg, setMsg] = useState("");
   const cam = useRef();
 
@@ -30,6 +31,7 @@ function ImagesToPdf() {
 
   const makePDF = async () => {
     setBusy(true);
+    setDone(0);
     setMsg("");
     try {
       const pdf = await PDFDocument.create();
@@ -37,6 +39,7 @@ function ImagesToPdf() {
       for (const f of files) {
         const { bytes } = await imageToJpeg(f);
         imgs.push(await pdf.embedJpg(bytes));
+        setDone((d) => d + 1);
       }
 
       const cols = per === 4 ? 2 : 1;
@@ -102,6 +105,7 @@ function ImagesToPdf() {
       </Field>
 
       {msg && <p className="error">{msg}</p>}
+      {busy && <Progress done={done} total={files.length} />}
       <button className="btn" onClick={makePDF} disabled={!files.length || busy}>
         {busy ? t("creating") : t("createPdf", { n: files.length })}
       </button>

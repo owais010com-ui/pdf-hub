@@ -5,11 +5,13 @@ import { renderThumbs } from "./pdfThumbs";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
+import { Progress } from "./ui";
 
 function Merge() {
   const { t } = useT();
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(0);
   const [msg, setMsg] = useState("");
   const [result, setResult] = useState(null);
 
@@ -20,6 +22,7 @@ function Merge() {
 
   const mergePDFs = async () => {
     setBusy(true);
+    setDone(0);
     setMsg("");
     setResult(null);
     let data;
@@ -29,6 +32,7 @@ function Merge() {
         const pdf = await PDFDocument.load(await file.arrayBuffer());
         const pages = await merged.copyPages(pdf, pdf.getPageIndices());
         pages.forEach((p) => merged.addPage(p));
+        setDone((d) => d + 1);
       }
       data = await merged.save();
     } catch {
@@ -60,6 +64,7 @@ function Merge() {
       <p className="note">{t("mergeHint")}</p>
       {msg && <p className="error">{msg}</p>}
 
+      {busy && <Progress done={done} total={files.length} />}
       <button className="btn" onClick={mergePDFs} disabled={files.length < 2 || busy}>
         {busy ? t("merging") : t("mergePreview")}
       </button>
