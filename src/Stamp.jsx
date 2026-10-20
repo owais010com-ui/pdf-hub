@@ -3,6 +3,7 @@ import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
 import { download } from "./download";
 import { parsePages } from "./utils";
 import { usePdf } from "./usePdf";
+import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import { Choice, Field } from "./ui";
 
@@ -18,6 +19,7 @@ const DEFAULTS = {
 };
 
 function Stamp() {
+    const { t } = useT();
     const { file, total, error, pick } = usePdf();
     const [mode, setMode] = useState("text");
     const [text, setText] = useState("");
@@ -41,8 +43,8 @@ function Stamp() {
 
     const run = async () => {
         const idx = parsePages(pages, total);
-        if (!idx || !idx.length) return setMsg("Invalid pages. Example: all or 1-3, 7");
-        if (mode !== "numbers" && !text.trim()) return setMsg("Type some text first.");
+        if (!idx || !idx.length) return setMsg(t("badPagesAll"));
+        if (mode !== "numbers" && !text.trim()) return setMsg(t("typeFirst"));
         setBusy(true);
         setMsg("");
         try {
@@ -86,7 +88,7 @@ function Stamp() {
 
             download(await doc.save(), "edited.pdf");
         } catch {
-            setMsg("Could not add this text. Use English letters and numbers only.");
+            setMsg(t("stampErr"));
         }
         setBusy(false);
     };
@@ -95,47 +97,46 @@ function Stamp() {
         <div className="flex flex-col gap-5">
             <FileDrop
                 types={["application/pdf"]}
-                label={file ? file.name : "Choose a PDF"}
+                label={file ? file.name : t("choosePdf")}
                 onFiles={pick}
             />
-            {error && <p className="error">{error}</p>}
+            {error && <p className="error">{t("pdfOpen")}</p>}
 
             {file && (
                 <>
-                    <Field label="Tool">
+                    <Field label={t("tool")}>
                         <Choice
                             value={mode}
                             onChange={switchMode}
-                            options={[["text", "Add text"], ["watermark", "Watermark"], ["numbers", "Page numbers"]]}
+                            options={[["text", t("addText")], ["watermark", t("watermark")], ["numbers", t("pageNumbers")]]}
                         />
                     </Field>
 
                     {mode !== "numbers" && (
                         <div>
-                            <span className="label">Text (English only)</span>
+                            <span className="label">{t("textEn")}</span>
                             <input
                                 className="input"
+                                dir="ltr"
                                 style={{ width: "100%" }}
                                 value={text}
                                 onChange={(e) => setText(e.target.value)}
-                                placeholder={mode === "watermark" ? "CONFIDENTIAL" : "Type here"}
+                                placeholder={mode === "watermark" ? "CONFIDENTIAL" : t("typeHere")}
                             />
                         </div>
                     )}
 
                     {mode === "text" && (
                         <>
-                            <p className="note">
-                                Adds new text on top of the PDF. Existing text in the PDF cannot be edited.
-                            </p>
+                            <p className="note">{t("stampNote")}</p>
                             <div className="flex flex-wrap gap-5">
                                 <div style={{ flex: 1, minWidth: 180 }}>
-                                    <span className="label">Left to right: {x}%</span>
-                                    <input type="range" min="0" max="95" value={x} onChange={(e) => setX(Number(e.target.value))} style={{ width: "100%" }} />
+                                    <span className="label">{t("leftRight", { n: x })}</span>
+                                    <input type="range" dir="ltr" min="0" max="95" value={x} onChange={(e) => setX(Number(e.target.value))} style={{ width: "100%" }} />
                                 </div>
                                 <div style={{ flex: 1, minWidth: 180 }}>
-                                    <span className="label">Top to bottom: {y}%</span>
-                                    <input type="range" min="0" max="95" value={y} onChange={(e) => setY(Number(e.target.value))} style={{ width: "100%" }} />
+                                    <span className="label">{t("topBottom", { n: y })}</span>
+                                    <input type="range" dir="ltr" min="0" max="95" value={y} onChange={(e) => setY(Number(e.target.value))} style={{ width: "100%" }} />
                                 </div>
                             </div>
                         </>
@@ -143,38 +144,38 @@ function Stamp() {
 
                     {mode === "watermark" && (
                         <div>
-                            <span className="label">Opacity: {Math.round(opacity * 100)}%</span>
-                            <input type="range" min="0.05" max="1" step="0.05" value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} style={{ width: "100%" }} />
+                            <span className="label">{t("opacity", { n: Math.round(opacity * 100) })}</span>
+                            <input type="range" dir="ltr" min="0.05" max="1" step="0.05" value={opacity} onChange={(e) => setOpacity(Number(e.target.value))} style={{ width: "100%" }} />
                         </div>
                     )}
 
                     {mode === "numbers" && (
                         <>
-                            <Field label="Position">
+                            <Field label={t("position")}>
                                 <Choice
                                     value={pos}
                                     onChange={setPos}
-                                    options={[["bl", "Bottom left"], ["bc", "Bottom center"], ["br", "Bottom right"], ["tl", "Top left"], ["tc", "Top center"], ["tr", "Top right"]]}
+                                    options={[["bl", t("bl")], ["bc", t("bc")], ["br", t("br")], ["tl", t("tl")], ["tc", t("tc")], ["tr", t("tr")]]}
                                 />
                             </Field>
-                            <Field label="Format">
-                                <Choice value={fmt} onChange={setFmt} options={[["n", "1, 2, 3"], ["of", "Page 1 of N"]]} />
+                            <Field label={t("format")}>
+                                <Choice value={fmt} onChange={setFmt} options={[["n", "1, 2, 3"], ["of", t("fmtOf")]]} />
                             </Field>
                         </>
                     )}
 
                     <div className="flex flex-wrap gap-5 items-end">
                         <div>
-                            <span className="label">Size</span>
+                            <span className="label">{t("size")}</span>
                             <input type="number" className="input" style={{ width: 90 }} min="6" max="200" value={size} onChange={(e) => setSize(Number(e.target.value))} />
                         </div>
                         <div>
-                            <span className="label">Color</span>
+                            <span className="label">{t("color")}</span>
                             <input type="color" value={color} onChange={(e) => setColor(e.target.value)} style={{ width: 60, height: 42 }} />
                         </div>
                         <div style={{ flex: 1, minWidth: 160 }}>
-                            <span className="label">Pages (total {total})</span>
-                            <input className="input" style={{ width: "100%" }} value={pages} onChange={(e) => setPages(e.target.value)} />
+                            <span className="label">{t("pagesTotal", { n: total })}</span>
+                            <input className="input" dir="ltr" style={{ width: "100%" }} value={pages} onChange={(e) => setPages(e.target.value)} />
                         </div>
                     </div>
                 </>
@@ -182,7 +183,7 @@ function Stamp() {
 
             {msg && <p className="error">{msg}</p>}
             <button className="btn" onClick={run} disabled={!file || busy}>
-                {busy ? "Working..." : "Apply and download"}
+                {busy ? t("working") : t("apply")}
             </button>
         </div>
     );

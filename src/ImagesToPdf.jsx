@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
 import { imageToJpeg } from "./utils";
+import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
 import { Choice, Field } from "./ui";
@@ -12,6 +13,7 @@ const M = 18;
 const GAP = 12;
 
 function ImagesToPdf() {
+  const { t } = useT();
   const [files, setFiles] = useState([]);
   const [per, setPer] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -62,7 +64,7 @@ function ImagesToPdf() {
       }
       download(await pdf.save(), "images.pdf");
     } catch {
-      setMsg("Something went wrong with one of the images.");
+      setMsg(t("imgErr"));
     }
     setBusy(false);
   };
@@ -72,13 +74,13 @@ function ImagesToPdf() {
       <FileDrop
         types={["image/png", "image/jpeg"]}
         multiple
-        label="Add photos (JPG or PNG)"
+        label={t("addPhotos")}
         onFiles={(f) => setFiles([...files, ...f])}
       />
 
       <div>
         <button className="btn btn-ghost" onClick={() => cam.current.click()}>
-          Scan with camera
+          {t("scan")}
         </button>
         <input
           ref={cam}
@@ -89,19 +91,19 @@ function ImagesToPdf() {
           onChange={addFromCamera}
         />
         <p className="note" style={{ margin: "6px 0 0" }}>
-          On phone this opens the camera. Take one photo per page.
+          {t("scanHint")}
         </p>
       </div>
 
       <FileList files={files} setFiles={setFiles} />
 
-      <Field label="Photos per page">
+      <Field label={t("perPage")}>
         <Choice value={per} onChange={setPer} options={[[1, "1"], [2, "2"], [4, "4"]]} />
       </Field>
 
       {msg && <p className="error">{msg}</p>}
       <button className="btn" onClick={makePDF} disabled={!files.length || busy}>
-        {busy ? "Creating..." : `Create PDF (${files.length} photos)`}
+        {busy ? t("creating") : t("createPdf", { n: files.length })}
       </button>
     </div>
   );

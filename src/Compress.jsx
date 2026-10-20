@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { download } from "./download";
+import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import { Choice, Field } from "./ui";
 
@@ -46,6 +47,7 @@ async function compress(file, targetKB) {
 const fmt = (b) => (b / 1024).toFixed(0) + " KB";
 
 function Compress() {
+  const { t } = useT();
   const [file, setFile] = useState(null);
   const [kb, setKb] = useState(200);
   const [result, setResult] = useState(null);
@@ -61,26 +63,26 @@ function Compress() {
     <div className="flex flex-col gap-5">
       <FileDrop
         types={["image/png", "image/jpeg"]}
-        label={file ? file.name : "Choose a photo"}
+        label={file ? file.name : t("choosePhoto")}
         onFiles={([f]) => {
           setFile(f);
           setResult(null);
         }}
       />
 
-      <Field label="Target size">
+      <Field label={t("target")}>
         <Choice
           value={kb}
           onChange={(v) => {
             setKb(v);
             setResult(null);
           }}
-          options={[[200, "CNIC 200 KB"], [500, "Form 500 KB"], [1024, "Portal 1 MB"]]}
+          options={[[200, t("cnic")], [500, t("form")], [1024, t("portal")]]}
         />
       </Field>
 
       <div>
-        <span className="label">Or type your own size (KB)</span>
+        <span className="label">{t("customKb")}</span>
         <input
           type="number"
           className="input"
@@ -95,19 +97,19 @@ function Compress() {
       </div>
 
       <button className="btn" onClick={run} disabled={!file || busy || kb < 20}>
-        {busy ? "Compressing..." : "Compress"}
+        {busy ? t("compressing") : t("compressBtn")}
       </button>
 
       {file && result && (
         <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap", padding: 14 }}>
-          <span>
+          <span dir="ltr">
             {fmt(file.size)} → <b>{fmt(result.size)}</b>
           </span>
           <button
             className="btn btn-sm"
             onClick={() => download(result, "compressed.jpg", "image/jpeg")}
           >
-            Download image
+            {t("dlImage")}
           </button>
         </div>
       )}

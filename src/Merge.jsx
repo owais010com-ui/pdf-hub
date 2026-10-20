@@ -1,17 +1,28 @@
 import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
+import { renderThumbs } from "./pdfThumbs";
+import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
 
 function Merge() {
+  const { t } = useT();
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [result, setResult] = useState(null);
+
+  const update = (f) => {
+    setFiles(f);
+    setResult(null);
+  };
 
   const mergePDFs = async () => {
     setBusy(true);
     setMsg("");
+    setResult(null);
+    let data;
     try {
       const merged = await PDFDocument.create();
       for (const file of files) {
@@ -19,9 +30,20 @@ function Merge() {
         const pages = await merged.copyPages(pdf, pdf.getPageIndices());
         pages.forEach((p) => merged.addPage(p));
       }
-      download(await merged.save(), "merged.pdf");
+      data = await merged.save();
     } catch {
-      setMsg("One of the PDFs could not be opened (password protected or damaged).");
+      setMsg(t("pdfOpenMerge"));
+      setBusy(false);
+      return;
+    }
+
+    setResult({ data, thumbs: [] });
+    try {
+      await renderThumbs(data, (src) =>
+        setResult((r) => (r ? { ...r, thumbs: [...r.thumbs, src] } : r))
+      );
+    } catch {
+      setMsg(t("previewFailMerge"));
     }
     setBusy(false);
   };
@@ -31,15 +53,43 @@ function Merge() {
       <FileDrop
         types={["application/pdf"]}
         multiple
-        label="Add PDF files"
-        onFiles={(f) => setFiles([...files, ...f])}
+        label={t("addPdfs")}
+        onFiles={(f) => update([...files, ...f])}
       />
-      <FileList files={files} setFiles={setFiles} />
-      <p className="note">Use the arrows to set the order. Minimum 2 PDFs.</p>
+      <FileList files={files} setFiles={update} />
+      <p className="note">{t("mergeHint")}</p>
       {msg && <p className="error">{msg}</p>}
+
       <button className="btn" onClick={mergePDFs} disabled={files.length < 2 || busy}>
-        {busy ? "Merging..." : "Merge PDFs"}
+        {busy ? t("merging") : t("mergePreview")}
       </button>
+
+      {result && (
+        <div className="flex flex-col gap-3">
+          <p className="note" style={{ margin: 0 }}>
+            {t("previewLoaded", { n: result.thumbs.length })}
+          </p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+              gap: 8,
+            }}
+          >
+            {result.thumbs.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                style={{ width: "100%", border: "1px solid var(--line)", borderRadius: 6 }}
+              />
+            ))}
+          </div>
+          <button className="btn" onClick={() => download(result.data, "merged.pdf")}>
+            {t("dlMerged")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

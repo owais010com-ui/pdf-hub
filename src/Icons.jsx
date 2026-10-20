@@ -34,6 +34,14 @@ const paths = {
             <path d="M10 11v6M14 11v6" />
         </>
     ),
+    grid: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </>
+    ),
     text: (
         <>
             <path d="M4 7V4h16v3" />

@@ -12,6 +12,6 @@ export function download(data, filename, type = "application/pdf") {
       ? (blob.size / 1024 / 1024).toFixed(1) + " MB"
       : Math.round(blob.size / 1024) + " KB";
   window.dispatchEvent(
-    new CustomEvent("toast", { detail: `${filename} is ready (${size})` }),
+    new CustomEvent("toast", { detail: { name: filename, size } }),
   );
 }

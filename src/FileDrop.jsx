@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
+import { useT } from "./i18n";
 
 function FileDrop({ types, multiple, onFiles, label }) {
+    const { t } = useT();
     const ref = useRef();
     const [over, setOver] = useState(false);
 
@@ -26,7 +28,7 @@ function FileDrop({ types, multiple, onFiles, label }) {
         >
             <p style={{ margin: 0, fontWeight: 600 }}>{label}</p>
             <p className="note" style={{ margin: "4px 0 0" }}>
-                Drop here or click to choose
+                {t("dropHint")}
             </p>
             <input
                 ref={ref}
