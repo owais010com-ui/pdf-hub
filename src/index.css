@@ -262,11 +262,34 @@ header {
   }
 }
 
+@keyframes toastDrop {
+  0% {
+    transform: translateY(-140%);
+    opacity: 0;
+  }
+  12% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  82% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-140%);
+    opacity: 0;
+  }
+}
+
 .toast {
   position: fixed;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  text-align: center;
   background: var(--ink);
   color: var(--bg);
   padding: 12px 20px;
@@ -275,8 +298,7 @@ header {
   font-weight: 600;
   z-index: 50;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  animation: swap 0.3s ease both;
-  max-width: calc(100vw - 32px);
+  animation: toastDrop 3.2s ease forwards;
 }
 
 .wa {

@@ -2,9 +2,11 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
 import { imageToJpeg } from "./utils";
+import { addFooter } from "./footer";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
+import FooterToggle from "./FooterToggle";
 import { Choice, Field, Progress } from "./ui";
 
 const PW = 595.28;
@@ -42,10 +44,11 @@ function ImagesToPdf() {
         setDone((d) => d + 1);
       }
 
+      const MB = 34;
       const cols = per === 4 ? 2 : 1;
       const rows = per / cols;
       const cw = (PW - 2 * M - GAP * (cols - 1)) / cols;
-      const ch = (PH - 2 * M - GAP * (rows - 1)) / rows;
+      const ch = (PH - M - MB - GAP * (rows - 1)) / rows;
 
       for (let i = 0; i < imgs.length; i += per) {
         const page = pdf.addPage([PW, PH]);
@@ -65,7 +68,10 @@ function ImagesToPdf() {
           });
         });
       }
+
+      await addFooter(pdf);
       download(await pdf.save(), "images.pdf");
+      setFiles([]);
     } catch {
       setMsg(t("imgErr"));
     }
@@ -103,6 +109,8 @@ function ImagesToPdf() {
       <Field label={t("perPage")}>
         <Choice value={per} onChange={setPer} options={[[1, "1"], [2, "2"], [4, "4"]]} />
       </Field>
+
+      <FooterToggle />
 
       {msg && <p className="error">{msg}</p>}
       {busy && <Progress done={done} total={files.length} />}

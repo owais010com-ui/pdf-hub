@@ -2,8 +2,10 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
 import { renderThumbs } from "./pdfThumbs";
+import { addFooter } from "./footer";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
+import FooterToggle from "./FooterToggle";
 
 function Organize() {
     const { t } = useT();
@@ -22,7 +24,7 @@ function Organize() {
         setFile(null);
         setLoading(true);
 
-        let count = 0;
+        let count;
         try {
             bytes.current = await f.arrayBuffer();
             const doc = await PDFDocument.load(bytes.current);
@@ -61,6 +63,7 @@ function Organize() {
         const out = await PDFDocument.create();
         const pages = await out.copyPages(src, items.map((x) => x.index));
         pages.forEach((p) => out.addPage(p));
+        await addFooter(out);
         download(await out.save(), "organized.pdf");
     };
 
@@ -159,6 +162,7 @@ function Organize() {
                 </>
             )}
 
+            <FooterToggle />
             <button className="btn" onClick={save} disabled={!items.length || loading}>
                 {t("savePdf")}
             </button>

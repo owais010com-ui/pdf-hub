@@ -2,9 +2,11 @@ import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
 import { parsePages } from "./utils";
+import { addFooter } from "./footer";
 import { usePdf } from "./usePdf";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
+import FooterToggle from "./FooterToggle";
 
 function Split() {
   const { t } = useT();
@@ -19,6 +21,7 @@ function Split() {
     const src = await PDFDocument.load(await file.arrayBuffer());
     const out = await PDFDocument.create();
     (await out.copyPages(src, idx)).forEach((p) => out.addPage(p));
+    await addFooter(out);
     download(await out.save(), "split.pdf");
   };
 
@@ -42,6 +45,7 @@ function Split() {
           />
         </div>
       )}
+      <FooterToggle />
       {msg && <p className="error">{msg}</p>}
       <button className="btn" onClick={run} disabled={!file}>
         {t("extract")}

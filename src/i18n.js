@@ -29,6 +29,7 @@ export const dict = {
     toDark: "Switch to dark",
     ready: "{name} is ready ({size})",
     dropHint: "Drop here or click to choose",
+    footerOpt: "Add page number",
     pdfOpen:
       "Could not open this PDF. It may be password protected or damaged.",
     pdfOpenMerge:
@@ -153,6 +154,7 @@ export const dict = {
     loadingPrev: "پریویو لوڈ ہو رہے ہیں...",
     nPages: "{n} صفحات",
     dragHint: "ترتیب بدلنے کے لیے گھسیٹیں یا تیر استعمال کریں۔",
+    footerOpt: "صفحہ نمبر لگائیں",
     reverse: "ترتیب الٹ دیں",
     pageN: "صفحہ {n}",
     savePdf: "PDF محفوظ کریں",

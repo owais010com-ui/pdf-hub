@@ -43,3 +43,5 @@ export function useBrand() {
 
   return { brand, save, reset };
 }
+
+export { read as getBrand };

@@ -45,7 +45,7 @@ function App() {
   const { t, lang, setLang } = useT();
   const [tab, setTab] = useState("images");
   const [theme, setTheme] = useTheme();
-  const [toast, setToast] = useState("");
+  const [toast, setToast] = useState(null);
   const { brand, save, reset } = useBrand();
   const admin = new URLSearchParams(window.location.search).has("admin");
   const active = TABS.find((x) => x.id === tab);
@@ -60,16 +60,16 @@ function App() {
   useEffect(() => {
     let timer;
     const onToast = (e) => {
-      setToast(t("ready", e.detail));
+      setToast({ id: Date.now(), detail: e.detail });
       clearTimeout(timer);
-      timer = setTimeout(() => setToast(""), 3500);
+      timer = setTimeout(() => setToast(null), 3300);
     };
     window.addEventListener("toast", onToast);
     return () => {
       window.removeEventListener("toast", onToast);
       clearTimeout(timer);
     };
-  });
+  }, []);
 
   const waLink = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(t("waMsg"))}`;
 
@@ -173,7 +173,11 @@ function App() {
         )}
       </main>
 
-      {toast && <div className="toast">{toast}</div>}
+      {toast && (
+        <div key={toast.id} className="toast">
+          {t("ready", toast.detail)}
+        </div>
+      )}
     </div>
   );
 }

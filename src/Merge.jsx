@@ -2,9 +2,11 @@ import { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { download } from "./download";
 import { renderThumbs } from "./pdfThumbs";
+import { addFooter } from "./footer";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
+import FooterToggle from "./FooterToggle";
 import { Progress } from "./ui";
 
 function Merge() {
@@ -34,6 +36,7 @@ function Merge() {
         pages.forEach((p) => merged.addPage(p));
         setDone((d) => d + 1);
       }
+      await addFooter(merged);
       data = await merged.save();
     } catch {
       setMsg(t("pdfOpenMerge"));
@@ -62,6 +65,7 @@ function Merge() {
       />
       <FileList files={files} setFiles={update} />
       <p className="note">{t("mergeHint")}</p>
+      <FooterToggle />
       {msg && <p className="error">{msg}</p>}
 
       {busy && <Progress done={done} total={files.length} />}
