@@ -18,8 +18,8 @@ export default defineConfig({
         name: config.name,
         short_name: config.name.slice(0, 12),
         description: config.tagline,
-        theme_color: "#f5f2ea",
-        background_color: "#f5f2ea",
+        theme_color: "#0f0f0f",
+        background_color: "#0f0f0f",
         display: "standalone",
         icons: [
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },

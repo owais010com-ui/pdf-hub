@@ -14,7 +14,7 @@ export function parsePages(str, total) {
   return [...set].sort((x, y) => x - y);
 }
 
-export async function imageToJpeg(file, maxSide = 2600) {
+export async function imageToJpeg(file, maxSide = 2000) {
   const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
   const s = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
   const width = Math.round(bmp.width * s);
@@ -26,8 +26,11 @@ export async function imageToJpeg(file, maxSide = 2600) {
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
   ctx.drawImage(bmp, 0, 0, width, height);
+  bmp.close();
   const blob = await new Promise((res) =>
-    canvas.toBlob(res, "image/jpeg", 0.92),
+    canvas.toBlob(res, "image/jpeg", 0.85),
   );
+  canvas.width = 0;
+  canvas.height = 0;
   return { bytes: await blob.arrayBuffer(), width, height };
 }

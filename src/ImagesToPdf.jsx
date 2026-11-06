@@ -6,12 +6,12 @@ import { addFooter } from "./footer";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
-import FooterToggle from "./FooterToggle";
 import { Choice, Field, Progress } from "./ui";
 
 const PW = 595.28;
 const PH = 841.89;
 const M = 18;
+const MB = 34;
 const GAP = 12;
 
 function ImagesToPdf() {
@@ -42,9 +42,9 @@ function ImagesToPdf() {
         const { bytes } = await imageToJpeg(f);
         imgs.push(await pdf.embedJpg(bytes));
         setDone((d) => d + 1);
+        await new Promise((r) => setTimeout(r, 0));
       }
 
-      const MB = 34;
       const cols = per === 4 ? 2 : 1;
       const rows = per / cols;
       const cw = (PW - 2 * M - GAP * (cols - 1)) / cols;
@@ -70,9 +70,9 @@ function ImagesToPdf() {
       }
 
       await addFooter(pdf);
-      download(await pdf.save(), "images.pdf");
-      setFiles([]);
-    } catch {
+      download(await pdf.save(), "images.pdf", "application/pdf", () => setFiles([]));
+    } catch (e) {
+      console.error(e);
       setMsg(t("imgErr"));
     }
     setBusy(false);
@@ -109,8 +109,6 @@ function ImagesToPdf() {
       <Field label={t("perPage")}>
         <Choice value={per} onChange={setPer} options={[[1, "1"], [2, "2"], [4, "4"]]} />
       </Field>
-
-      <FooterToggle />
 
       {msg && <p className="error">{msg}</p>}
       {busy && <Progress done={done} total={files.length} />}

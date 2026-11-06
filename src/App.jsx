@@ -6,6 +6,7 @@ import Organize from "./Organize";
 import Stamp from "./Stamp";
 import Compress from "./Compress";
 import BrandPanel from "./BrandPanel";
+import SaveDialog from "./SaveDialog";
 import { Icon, Tile } from "./Icons";
 import { useBrand } from "./brand";
 import { useT } from "./i18n";
@@ -172,6 +173,8 @@ function App() {
           </div>
         )}
       </main>
+
+      <SaveDialog />
 
       {toast && (
         <div key={toast.id} className="toast">

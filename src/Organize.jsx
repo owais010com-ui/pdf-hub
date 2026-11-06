@@ -5,7 +5,6 @@ import { renderThumbs } from "./pdfThumbs";
 import { addFooter } from "./footer";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
-import FooterToggle from "./FooterToggle";
 
 function Organize() {
     const { t } = useT();
@@ -162,7 +161,6 @@ function Organize() {
                 </>
             )}
 
-            <FooterToggle />
             <button className="btn" onClick={save} disabled={!items.length || loading}>
                 {t("savePdf")}
             </button>

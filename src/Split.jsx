@@ -6,7 +6,6 @@ import { addFooter } from "./footer";
 import { usePdf } from "./usePdf";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
-import FooterToggle from "./FooterToggle";
 
 function Split() {
   const { t } = useT();
@@ -45,7 +44,6 @@ function Split() {
           />
         </div>
       )}
-      <FooterToggle />
       {msg && <p className="error">{msg}</p>}
       <button className="btn" onClick={run} disabled={!file}>
         {t("extract")}

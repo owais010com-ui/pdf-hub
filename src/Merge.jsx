@@ -6,7 +6,6 @@ import { addFooter } from "./footer";
 import { useT } from "./i18n";
 import FileDrop from "./FileDrop";
 import FileList from "./FileList";
-import FooterToggle from "./FooterToggle";
 import { Progress } from "./ui";
 
 function Merge() {
@@ -65,7 +64,6 @@ function Merge() {
       />
       <FileList files={files} setFiles={update} />
       <p className="note">{t("mergeHint")}</p>
-      <FooterToggle />
       {msg && <p className="error">{msg}</p>}
 
       {busy && <Progress done={done} total={files.length} />}
