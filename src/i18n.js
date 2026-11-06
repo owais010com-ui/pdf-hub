@@ -102,6 +102,10 @@ export const dict = {
     compressBtn: "Compress",
     compressing: "Compressing...",
     dlImage: "Download image",
+    placeHint: "Tap or drag on the page to place the text.",
+    pageOfN: "Page {a} of {b}",
+    previewLoading: "Loading preview...",
+    previewFail: "Preview could not load.",
   },
   ur: {
     tagline: "پرائیویٹ PDF ٹولز۔ آپ کی فائلیں آپ کے ڈیوائس سے باہر نہیں جاتیں۔",
@@ -202,6 +206,10 @@ export const dict = {
     compressBtn: "چھوٹی کریں",
     compressing: "چھوٹی ہو رہی ہے...",
     dlImage: "تصویر ڈاؤن لوڈ کریں",
+    placeHint: "ٹیکسٹ رکھنے کے لیے صفحے پر ٹیپ کریں یا گھسیٹیں۔",
+    pageOfN: "صفحہ {a} از {b}",
+    previewLoading: "پریویو لوڈ ہو رہا ہے...",
+    previewFail: "پریویو لوڈ نہیں ہو سکا۔",
   },
 };
 

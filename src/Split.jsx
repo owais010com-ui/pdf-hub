@@ -9,7 +9,7 @@ import FileDrop from "./FileDrop";
 
 function Split() {
   const { t } = useT();
-  const { file, total, error, pick } = usePdf();
+  const { file, total, error, pick, reset } = usePdf();
   const [range, setRange] = useState("");
   const [msg, setMsg] = useState("");
 
@@ -21,7 +21,10 @@ function Split() {
     const out = await PDFDocument.create();
     (await out.copyPages(src, idx)).forEach((p) => out.addPage(p));
     await addFooter(out);
-    download(await out.save(), "split.pdf");
+    download(await out.save(), "split.pdf", "application/pdf", () => {
+      reset();
+      setRange("");
+    });
   };
 
   return (

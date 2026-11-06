@@ -19,5 +19,11 @@ export function usePdf() {
     }
   };
 
-  return { file, total, error, pick };
+  const reset = () => {
+    setFile(null);
+    setTotal(0);
+    setError(false);
+  };
+
+  return { file, total, error, pick, reset };
 }

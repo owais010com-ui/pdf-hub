@@ -54,6 +54,13 @@ function Merge() {
     setBusy(false);
   };
 
+  const saveMerged = () =>
+    download(result.data, "merged.pdf", "application/pdf", () => {
+      setFiles([]);
+      setResult(null);
+      setMsg("");
+    });
+
   return (
     <div className="flex flex-col gap-5">
       <FileDrop
@@ -92,7 +99,7 @@ function Merge() {
               />
             ))}
           </div>
-          <button className="btn" onClick={() => download(result.data, "merged.pdf")}>
+          <button className="btn" onClick={saveMerged}>
             {t("dlMerged")}
           </button>
         </div>

@@ -63,7 +63,11 @@ function Organize() {
         const pages = await out.copyPages(src, items.map((x) => x.index));
         pages.forEach((p) => out.addPage(p));
         await addFooter(out);
-        download(await out.save(), "organized.pdf");
+        download(await out.save(), "organized.pdf", "application/pdf", () => {
+            setFile(null);
+            setItems([]);
+            setWarn(false);
+        });
     };
 
     const small = { padding: "4px 9px" };
